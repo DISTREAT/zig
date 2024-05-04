@@ -459,8 +459,8 @@ fn refreshOutputBufWithHeldLock(self: *Progress, node: *Node, need_newline: *boo
 
 /// Print to the terminal, temporarily stopping the progress bar from flushing the buffer
 pub fn log(self: *Progress, comptime format: []const u8, args: anytype) void {
-    self.lock_stderr();
-    defer self.unlock_stderr();
+    self.clearWithHeldLock();
+    self.writeOutputBufferToFile();
     const file = self.terminal orelse {
         std.debug.print(format, args);
         return;
