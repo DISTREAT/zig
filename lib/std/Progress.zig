@@ -239,6 +239,10 @@ pub fn start(self: *Progress, name: []const u8, estimated_total_items: usize) *N
     return &self.root;
 }
 
+fn isTerminalDumb(self: *Progress) bool {
+    return !self.supports_ansi_escape_codes and !self.is_windows_terminal;
+}
+
 /// Updates the terminal if enough time has passed since last update. Thread-safe.
 pub fn maybeRefresh(self: *Progress) void {
     if (self.timer) |*timer| {
@@ -392,8 +396,7 @@ fn writeOutputBufferToFile(p: *Progress) void {
 }
 
 fn refreshWithHeldLock(self: *Progress) void {
-    const is_dumb = !self.supports_ansi_escape_codes and !self.is_windows_terminal;
-    if (is_dumb and self.dont_print_on_dumb) return;
+    if (self.isTerminalDumb() and self.dont_print_on_dumb) return;
 
     clearWithHeldLock(self);
 
@@ -459,8 +462,10 @@ fn refreshOutputBufWithHeldLock(self: *Progress, node: *Node, need_newline: *boo
 
 /// Print to the terminal, temporarily stopping the progress bar from flushing the buffer
 pub fn log(self: *Progress, comptime format: []const u8, args: anytype) void {
-    self.clearWithHeldLock();
-    self.writeOutputBufferToFile();
+    if (!(self.isTerminalDumb() and self.dont_print_on_dumb)) {
+        self.clearWithHeldLock();
+        self.writeOutputBufferToFile();
+    }
     const file = self.terminal orelse {
         std.debug.print(format, args);
         return;
@@ -475,8 +480,10 @@ pub fn log(self: *Progress, comptime format: []const u8, args: anytype) void {
 /// During the lock, the progress information is cleared from the terminal.
 pub fn lock_stderr(p: *Progress) void {
     p.update_mutex.lock();
-    clearWithHeldLock(p);
-    writeOutputBufferToFile(p);
+    if (!(p.isTerminalDumb() and p.dont_print_on_dumb)) {
+        p.clearWithHeldLock();
+        p.writeOutputBufferToFile();
+    }
     std.debug.getStderrMutex().lock();
 }
 
