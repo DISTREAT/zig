@@ -4148,6 +4148,9 @@ fn progressThread(progress: *std.Progress, server: *const Server, reset: *std.Th
         }
 
         progress.refresh();
+        progress.update_mutex.lock();
+        defer progress.update_mutex.unlock();
+
 
         // TODO: Provisional. This should be better integrated.
         for (progress.output_buffer[0 .. progress.rows_written + 1], 0..) |output_row, row_index| {
