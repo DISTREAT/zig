@@ -4027,13 +4027,12 @@ fn serve(
         .root = .{
             .context = undefined,
             .parent = null,
-            .name = "",
+            .name = "Building",
             .unprotected_estimated_total_items = 0,
             .unprotected_completed_items = 0,
         },
         .timer = null,
         .done = false,
-        .emulate_one_line_bar = true,
     };
     const main_progress_node = &progress.root;
     main_progress_node.context = &progress;
@@ -4433,8 +4432,8 @@ fn runOrTestHotSwap(
 fn updateModule(comp: *Compilation, color: Color) !void {
     {
         // If the terminal is dumb, we dont want to show the user all the output.
-        var progress: std.Progress = .{ .dont_print_on_dumb = true, .emulate_one_line_bar = true };
-        const main_progress_node = progress.start("", 0);
+        var progress: std.Progress = .{ .dont_print_on_dumb = true };
+        const main_progress_node = progress.start("Compiling", 0);
         defer main_progress_node.end();
         switch (color) {
             .off => {
@@ -4697,7 +4696,7 @@ const usage_build =
 ;
 
 fn cmdBuild(gpa: Allocator, arena: Allocator, args: []const []const u8) !void {
-    var progress: std.Progress = .{ .dont_print_on_dumb = true, .emulate_one_line_bar = true };
+    var progress: std.Progress = .{ .dont_print_on_dumb = true };
 
     var build_file: ?[]const u8 = null;
     var override_lib_dir: ?[]const u8 = try EnvVar.ZIG_LIB_DIR.get(arena);
@@ -5438,14 +5437,13 @@ fn jitCmd(
                 .root = .{
                     .context = undefined,
                     .parent = null,
-                    .name = "",
+                    .name = "Building",
                     .unprotected_estimated_total_items = 0,
                     .unprotected_completed_items = 0,
                 },
                 .prev_refresh_timestamp = 0,
                 .timer = null,
                 .done = false,
-                .emulate_one_line_bar = true,
             };
             const main_progress_node = &progress.root;
             main_progress_node.context = &progress;
@@ -6779,7 +6777,7 @@ fn cmdFetch(
 
     try http_client.initDefaultProxies(arena);
 
-    var progress: std.Progress = .{ .dont_print_on_dumb = true, .emulate_one_line_bar = true };
+    var progress: std.Progress = .{ .dont_print_on_dumb = true };
     const root_prog_node = progress.start("Fetch", 0);
     defer root_prog_node.end();
 
